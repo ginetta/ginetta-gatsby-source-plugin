@@ -1,0 +1,95 @@
+{
+  "name": "gatsby-starter-hello-world",
+  "description": "Gatsby hello world starter",
+  "license": "MIT",
+  "scripts": {
+    "d": "gatsby develop",
+    "build": "gatsby build",
+    "serve": "gatsby serve",
+    "test": "jest --coverage",
+    "watch:test": "jest --watch --coverage"
+  },
+  "dependencies": {
+    "cockpit-sdk": "^0.9.2",
+    "crypto": "^1.0.1",
+    "dotenv": "^5.0.0",
+    "gatsby": "^1.9.175",
+    "gatsby-link": "^1.6.35",
+    "gatsby-plugin-glamor": "^1.6.11",
+    "gatsby-plugin-react-next": "^1.0.8",
+    "gatsby-plugin-typography": "^1.7.13",
+    "gatsby-source-cockpit-headless-cms": "^1.0.1",
+    "gatsby-source-filesystem": "^1.5.16",
+    "glamorous": "^4.11.4",
+    "markdown": "^0.5.0",
+    "pluralize": "^7.0.0",
+    "react-markdown": "^3.1.4",
+    "react-render-html": "^0.6.0",
+    "sanitize-html": "^1.17.0",
+    "typography": "^0.16.6",
+    "typography-theme-kirkham": "^0.16.3",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.1",
+    "babel-jest": "^22.2.2",
+    "babel-plugin-syntax-class-properties": "^6.13.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "enzyme-to-json": "^3.3.1",
+    "eslint": "^4.16.0",
+    "eslint-config-fbjs": "^2.0.1",
+    "eslint-plugin-babel": "^4.1.2",
+    "eslint-plugin-flowtype": "^2.42.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.6.1",
+    "eslint-plugin-relay": "0.0.20",
+    "jest": "^22.2.2",
+    "jest-cli": "^22.2.2",
+    "react": "^16.2.0",
+    "react-addons-test-utils": "^15.6.2",
+    "react-dom": "^16.2.0",
+    "react-test-renderer": "^16.2.0"
+  },
+  "babel": {
+    "env": {
+      "test": {
+        "presets": [
+          "es2015",
+          "react"
+        ],
+        "plugins": [
+          "syntax-class-properties",
+          "transform-class-properties"
+        ]
+      }
+    }
+  },
+  "jest": {
+    "transform": {
+      ".(js|jsx)": "babel-jest"
+    },
+    "testRegex": "(\\.(test|spec))\\.(jsx|js)$",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/.cache/"
+    ],
+    "modulePaths": [
+      "src"
+    ],
+    "moduleNameMapper": {
+      "\\.(scss|svg|png|jpg)$": "<rootDir>/src/styleMock.js"
+    },
+    "moduleFileExtensions": [
+      "jsx",
+      "js"
+    ],
+    "coverageReporters": [
+      "lcov",
+      "text",
+      "html"
+    ],
+    "setupTestFrameworkScriptFile": "./src/setupTests.js"
+  }
+}

@@ -1,2 +1,3 @@
-# ginetta-gatsby-source-plugin
-A data source plugin to connect Cockpit with Gatsby.
+# gatsby-source-cockpit
+
+Work in progress

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Text component should render as expected 1`] = `
+<div
+  className="a-class another-class"
+  dangerouslySetInnerHTML={
+    Object {
+      "__html": "<div>Hello test world</div>",
+    }
+  }
+  id="id"
+  style={
+    Object {
+      "backgroundColor": "red",
+      "fontSize": 16,
+    }
+  }
+/>
+`;

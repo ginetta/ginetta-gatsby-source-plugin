@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Section component should render as expected 1`] = `
+<section
+  className="a-class another-class"
+  id="id"
+  style={
+    Object {
+      "backgroundColor": "red",
+      "fontSize": 16,
+    }
+  }
+>
+  <Component
+    component="section"
+    key="9999-9999"
+    settings={
+      Object {
+        "className": "a-class another-class",
+        "id": "id",
+        "style": Object {
+          "backgroundColor": "red",
+          "fontSize": 16,
+        },
+      }
+    }
+  />
+</section>
+`;
