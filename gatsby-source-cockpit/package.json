@@ -1,8 +1,8 @@
 {
-  "name": "gatsby-source-cockpit-headless-cms",
+  "name": "gatsby-plugin-cockpit",
   "description": "Gatsby source plugin for Cockpit headless CMS API.",
   "author": "Paul Hayes <paul@ginetta.net>",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "keywords": ["gatsby", "gatsby-plugin", "gatsby-source-plugin"],
   "license": "MIT",
   "dependencies": {
