@@ -10,15 +10,14 @@ async function createRemoteAssetByPath(url, store, cache, createNode) {
     cache,
     createNode,
   });
-  return ({ 
+  return {
     url,
     id,
     ext,
     name,
     contentDigest: internal.contentDigest,
-  });
+  };
 }
-
 
 async function createAssetsMap(assetPromises) {
   const allResults = await Promise.all(assetPromises);
@@ -46,33 +45,28 @@ class CockpitHelpers {
   // get all cockpit collections, together with their items
   async getCockpitCollections() {
     const collections = await this.getCollectionNames();
+    console.log('49', collections);
     return Promise.all(collections.map(name => this.getCollectionItems(name)));
-  }  
+  }
 
   async getCollectionNames() {
     const allCollections = await this.cockpit.collectionList();
     const explictlyDefinedCollections = this.config.collections;
 
-    return explictlyDefinedCollections instanceof Array 
+    return explictlyDefinedCollections instanceof Array
       ? allCollections.filter(
-        name => explictlyDefinedCollections.indexOf(name) > -1)
+        name => explictlyDefinedCollections.indexOf(name) > -1
+      )
       : allCollections;
   }
 }
 
 class AssetMapHelpers {
-  constructor({ 
-    assets, 
-    store, 
-    cache, 
-    createNode, 
-    collectionsItems, 
-    config,
-  }) {
+  constructor({ assets, store, cache, createNode, collectionsItems, config }) {
     this.assets = assets;
     this.store = store;
-    this.cache = cache; 
-    this.createNode = createNode; 
+    this.cache = cache;
+    this.createNode = createNode;
     this.collectionsItems = collectionsItems;
     this.config = config;
   }
@@ -88,13 +82,16 @@ class AssetMapHelpers {
             let path = entry[fieldname].path;
             if (!validUrl.isUri(path)) {
               path = this.config.baseURL + '/' + path;
-            };
+            }
             if (validUrl.isUri(path)) {
               this.assets.push({
                 path,
               });
             } else {
-              throw new Error('The path of an image seems to be malformed -> ', path);              
+              throw new Error(
+                'The path of an image seems to be malformed -> ',
+                path
+              );
             }
           }
         });
@@ -105,12 +102,17 @@ class AssetMapHelpers {
   // gets all assets and adds them as file nodes
   // returns a map of url => node id
   async createAssetsNodes() {
-
     this.addAllOtherImagesPathsToAssetsArray();
 
-    const allRemoteAssetsPromises = this.assets.map(asset => 
-      createRemoteAssetByPath(asset.path, this.store, this.cache, this.createNode));
-    
+    const allRemoteAssetsPromises = this.assets.map(asset =>
+      createRemoteAssetByPath(
+        asset.path,
+        this.store,
+        this.cache,
+        this.createNode
+      )
+    );
+
     const finalAssetsMap = await createAssetsMap(allRemoteAssetsPromises);
 
     return finalAssetsMap;
@@ -170,39 +172,49 @@ class CreateNodesHelpers {
   // map the entry image fields to link to the asset node
   // the important part is the `___NODE`.
   composeEntryImageFields(imageFields, entry) {
-    return imageFields.reduce(
-      (acc, fieldname) => {
-        if (entry[fieldname].path == null) {
-          return acc;
+    return imageFields.reduce((acc, fieldname) => {
+      if (entry[fieldname].path == null) {
+        return acc;
+      }
+
+      let fileLocation;
+      Object.keys(this.assetsMap).forEach(key => {
+        if (key.includes(entry[fieldname].path)) {
+          fileLocation = this.assetsMap[key];
         }
-  
-        let fileLocation;
-        Object.keys(this.assetsMap).forEach(key => {
-          if (key.includes(entry[fieldname].path)) {
-            fileLocation = this.assetsMap[key];
-          }
-        });
-        const key = fieldname + '___NODE';
-        const newAcc = {
-          ...acc,
-          [key]: fileLocation,
-        };
-        return newAcc;
-      }, {}
-    );
+      });
+      const key = fieldname + '___NODE';
+      const newAcc = {
+        ...acc,
+        [key]: fileLocation,
+      };
+      return newAcc;
+    }, {});
   }
 
   async parseWysiwygField(field) {
-    const srcRegex = /src\s*=\s*"(.+?)"/ig;
+    const srcRegex = /src\s*=\s*"(.+?)"/gi;
+    let imageSources;
+    try {
+      imageSources = field
+        .match(srcRegex)
+        .map(src => src.substr(5).slice(0, -1));
+    } catch (error) {
+      return {
+        images: [],
+        wysiwygImagesMap: [],
+        imageSources: [],
+      };
+    }
 
-    const imageSources = field.match(srcRegex).map(src => src.substr(5).slice(0, -1));
+    const validImageUrls = imageSources.map(
+      src => (validUrl.isUri(src) ? src : this.config.baseURL + src)
+    );
 
-    const validImageUrls = imageSources
-      .map(src => validUrl.isUri(src) ? src : this.config.baseURL + src);
+    const wysiwygImagesPromises = validImageUrls.map(url =>
+      createRemoteAssetByPath(url, this.store, this.cache, this.createNode)
+    );
 
-    const wysiwygImagesPromises = validImageUrls
-      .map(url => createRemoteAssetByPath(url, this.store, this.cache, this.createNode));
-    
     const imagesFulfilled = await Promise.all(wysiwygImagesPromises);
 
     const images = imagesFulfilled.map(({ contentDigest, ext, name }) => ({
@@ -210,7 +222,7 @@ class CreateNodesHelpers {
       ext,
       name,
     }));
-    
+
     const wysiwygImagesMap = await createAssetsMap(imagesFulfilled);
 
     return {
@@ -222,17 +234,27 @@ class CreateNodesHelpers {
 
   parseLayout(layout, isColumn = false) {
     const parsedLayout = layout.map(node => {
-      if (node.component === 'text') {
-        this.parseWysiwygField(node.settings.text)
-          .then( ({ wysiwygImagesMap, imageSources, images }) => {
+      if (node.component === 'text' || node.component === 'html') {
+        this.parseWysiwygField(node.settings.text || node.settings.html).then(
+          ({ wysiwygImagesMap, imageSources, images }) => {
             Object.entries(wysiwygImagesMap).forEach(([key, value], index) => {
               const { name, ext, contentDigest } = images[index];
               const newUrl = '/static/' + name + '-' + contentDigest + ext;
-              node.settings.text = node.settings.text.replace(
-                imageSources[index], newUrl
-              );
+              if (node.settings.text) {
+                node.settings.text = node.settings.text.replace(
+                  imageSources[index],
+                  newUrl
+                );
+              }
+              if (node.settings.html) {
+                node.settings.html = node.settings.html.replace(
+                  imageSources[index],
+                  newUrl
+                );
+              }
             });
-          });
+          }
+        );
       }
       if (node.children) {
         if (!isColumn) {
@@ -248,32 +270,30 @@ class CreateNodesHelpers {
       }
 
       return node;
-    })
+    });
     return parsedLayout;
   }
 
   composeEntryLayoutFields(layoutFields, entry) {
-    return layoutFields.reduce(
-      (acc, fieldname) => {
-        if (entry[fieldname].length === 0) {
-          return acc;
+    return layoutFields.reduce((acc, fieldname) => {
+      if (entry[fieldname].length === 0) {
+        return acc;
+      }
+      this.parseLayout(entry[fieldname]);
+
+      let fileLocation;
+      Object.keys(this.assetsMap).forEach(key => {
+        if (key.includes(entry[fieldname].path)) {
+          fileLocation = this.assetsMap[key];
         }
-        this.parseLayout(entry[fieldname]);
-        
-        let fileLocation;
-        Object.keys(this.assetsMap).forEach(key => {
-          if (key.includes(entry[fieldname].path)) {
-            fileLocation = this.assetsMap[key];
-          }
-        });
-        const key = fieldname + '___NODE';
-        const newAcc = {
-          ...acc,
-          [key]: fileLocation,
-        };
-        return newAcc;
-      }, {}
-    );
+      });
+      const key = fieldname + '___NODE';
+      const newAcc = {
+        ...acc,
+        [key]: fileLocation,
+      };
+      return newAcc;
+    }, {});
   }
 
   composeEntryWithOtherFields(otherFields, entry) {
@@ -291,8 +311,14 @@ class CreateNodesHelpers {
     const layoutFields = this.getLayoutFields(fields);
     const otherFields = this.getOtherFields(fields);
     const entryImageFields = this.composeEntryImageFields(imageFields, entry);
-    const entryLayoutFields = this.composeEntryLayoutFields(layoutFields, entry);
-    const entryWithOtherFields = this.composeEntryWithOtherFields(otherFields, entry);
+    const entryLayoutFields = this.composeEntryLayoutFields(
+      layoutFields,
+      entry
+    );
+    const entryWithOtherFields = this.composeEntryWithOtherFields(
+      otherFields,
+      entry
+    );
 
     const node = {
       ...entryWithOtherFields,

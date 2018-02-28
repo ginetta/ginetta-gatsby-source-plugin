@@ -17,7 +17,7 @@ module.exports = async (
     return {};
   }
 
-  const parseLayout = (layout) => {
+  const parseLayout = layout => {
     if (layout == null || layout.length === 0) {
       return layout;
     }
@@ -38,16 +38,29 @@ module.exports = async (
     return parsedLayout;
   };
 
-  const parseSettings = (node) => {
+  const parseHtml = (type, node) => {
     const { settings } = node;
-    if (settings.text === '') {
+    if (settings[type] === '') {
       node.html = null;
-      delete settings.text;
-    } else if (settings.text && settings.text.length > 0) {
-      node.html = settings.text;
-      node.html_sanitize = sanitizeHtml(settings.text, cockpitConfig.sanitizeHtmlConfig);
-      node.html_react = htmlToReactParser.parse(settings.text);
-      delete settings.text;
+    } else if (settings[type] && settings[type].length > 0) {
+      node.html = settings[type];
+      node.html_sanitize = sanitizeHtml(
+        settings[type],
+        cockpitConfig.sanitizeHtmlConfig
+      );
+      node.html_react = htmlToReactParser.parse(settings[type]);
+    }
+    delete settings[type];
+    return node;
+  };
+
+  const parseSettings = node => {
+    const { settings } = node;
+    if (settings.html) {
+      node = parseHtml('html', node);
+    }
+    if (settings.text) {
+      node = parseHtml('text', node);
     }
     if (settings.id === '') {
       settings.id = null;
@@ -67,7 +80,7 @@ module.exports = async (
   };
 
   let nodeExtendType = {};
-  collectionsItems.map(({entries, fields, name}) => {
+  collectionsItems.map(({ entries, fields, name }) => {
     if (type.name !== singular(name)) {
       return;
     }
