@@ -45,7 +45,6 @@ class CockpitHelpers {
   // get all cockpit collections, together with their items
   async getCockpitCollections() {
     const collections = await this.getCollectionNames();
-    console.log('49', collections);
     return Promise.all(collections.map(name => this.getCollectionItems(name)));
   }
 
@@ -81,7 +80,7 @@ class AssetMapHelpers {
           if (entry[fieldname].path) {
             let path = entry[fieldname].path;
             if (!validUrl.isUri(path)) {
-              path = this.config.baseURL + '/' + path;
+              path = this.config.host + '/' + path;
             }
             if (validUrl.isUri(path)) {
               this.assets.push({
@@ -114,7 +113,6 @@ class AssetMapHelpers {
     );
 
     const finalAssetsMap = await createAssetsMap(allRemoteAssetsPromises);
-
     return finalAssetsMap;
   }
 }
@@ -137,8 +135,9 @@ class CreateNodesHelpers {
   }
 
   async createCollectionsItemsNodes() {
-    Promise.all(
+    Promise.all(      
       this.collectionsItems.map(({ fields, entries, name }) => {
+        
         const nodes = entries.map(entry =>
           this.createItemNode({
             entry,
@@ -146,6 +145,7 @@ class CreateNodesHelpers {
             fields,
           })
         );
+
         return { name, nodes, fields };
       })
     );
@@ -177,12 +177,8 @@ class CreateNodesHelpers {
         return acc;
       }
 
-      let fileLocation;
-      Object.keys(this.assetsMap).forEach(key => {
-        if (key.includes(entry[fieldname].path)) {
-          fileLocation = this.assetsMap[key];
-        }
-      });
+      let fileLocation = this.getFileAsset(entry[fieldname].path);
+
       const key = fieldname + '___NODE';
       const newAcc = {
         ...acc,
@@ -208,7 +204,7 @@ class CreateNodesHelpers {
     }
 
     const validImageUrls = imageSources.map(
-      src => (validUrl.isUri(src) ? src : this.config.baseURL + src)
+      src => (validUrl.isUri(src) ? src : this.config.host + src)
     );
 
     const wysiwygImagesPromises = validImageUrls.map(url =>
@@ -232,7 +228,71 @@ class CreateNodesHelpers {
     };
   }
 
-  parseLayout(layout, isColumn = false) {
+
+  getFileAsset(path) {
+    let fileLocation;
+
+    Object.keys(this.assetsMap).forEach(key => {
+      if (key.includes(path)) {
+        fileLocation = this.assetsMap[key];
+      }
+    });
+
+    return fileLocation;
+  }
+
+  getSettingFileLocation(setting) {
+    let fileLocation;
+    let assets = [];
+
+    // if setting.path exists it is an images
+    if(setting !== null && setting.path !== undefined) {
+      setting.file = this.getFileAsset(setting.path);
+      if(setting.file) {
+        assets.push(setting.file);
+      }                
+    }
+    // if setting[0].path exists it is an array of images
+    else if (setting !== null && typeof setting === 'object' && setting[0] != undefined && setting[0].path !== undefined) {
+      Object.keys(setting).forEach( imageKey => {
+        const image = setting[imageKey];
+
+        image.file = this.getFileAsset(image.path);
+        if(image.file) {
+          assets.push(image.file);
+        }          
+        setting[imageKey] = image;
+        
+      })
+    }
+
+    return { setting, assets };
+  }
+
+  // look into Cockpit CP_LAYOUT_COMPONENTS for image and images.
+  parseCustomComponent( node, fieldname ) {
+    const { settings } = node;
+    const nodeAssets = [];
+
+    Object.keys(settings).map( (key, index) => {
+      const setting = settings[key];
+      
+      const { setting: updatedSetting, assets: newAssets } = this.getSettingFileLocation(setting);
+      settings[key] = updatedSetting;
+      nodeAssets.concat(newAssets);
+      
+    })
+    node.settings = settings;
+
+    return {
+      node,
+      nodeAssets,
+    };
+  }
+
+  parseLayout(layout, fieldname, isColumn = false) {
+    let layoutAssets = [];
+
     const parsedLayout = layout.map(node => {
       if (node.component === 'text' || node.component === 'html') {
         this.parseWysiwygField(node.settings.text || node.settings.html).then(
@@ -256,43 +316,60 @@ class CreateNodesHelpers {
           }
         );
       }
+
+      // parse Cockpit Custom Components (defined in plugin config in /gatsby-config.js)
+      if(this.config.customComponents.includes(node.component)) {
+        const {node: customNode, nodeAssets: customComponentAssets } = this.parseCustomComponent(node, fieldname);
+        
+        node = customNode;
+        layoutAssets = layoutAssets.concat(customComponentAssets);  
+      }
+
       if (node.children) {
         if (!isColumn) {
           console.log('component: ', node.component);
         } else {
           console.log('column');
         }
-        node.children = this.parseLayout(node.children);
+        
+        const {parsedLayout: childrenLayout, layoutAssets: childrenAssets } = this.parseLayout(node.children, fieldname);
+        node.children = childrenLayout;
+        layoutAssets = layoutAssets.concat(childrenAssets);
       }
       if (node.columns) {
-        console.log('component: ', node.component);
-        node.columns = this.parseLayout(node.columns, true);
+        const {parsedLayout: columnsLayout, layoutAssets: columnsAssets } = this.parseLayout(node.columns, fieldname, true);
+        node.columns = childrenLayout;
+        layoutAssets = layoutAssets.concat(columnsAssets);        
       }
 
       return node;
     });
-    return parsedLayout;
+
+    
+    return {
+      parsedLayout,
+      layoutAssets,
+    };
   }
 
   composeEntryLayoutFields(layoutFields, entry) {
+
     return layoutFields.reduce((acc, fieldname) => {
+      if( entry[fieldname] == null) return;
+      if(typeof entry[fieldname] === 'string')entry[fieldname] = eval('(' + entry[fieldname] + ')');
+      
       if (entry[fieldname].length === 0) {
         return acc;
       }
-      this.parseLayout(entry[fieldname]);
+      const {parsedLayout, layoutAssets} = this.parseLayout(entry[fieldname], fieldname);
+      
+      const key = fieldname + '_files___NODE';
+      
+      if(acc[key] !== undefined)acc[key] = acc[key].concat(layoutAssets);
+      else acc[key] = layoutAssets;
 
-      let fileLocation;
-      Object.keys(this.assetsMap).forEach(key => {
-        if (key.includes(entry[fieldname].path)) {
-          fileLocation = this.assetsMap[key];
-        }
-      });
-      const key = fieldname + '___NODE';
-      const newAcc = {
-        ...acc,
-        [key]: fileLocation,
-      };
-      return newAcc;
+      return acc;
+
     }, {});
   }
 
@@ -307,9 +384,12 @@ class CreateNodesHelpers {
   }
 
   createItemNode({ entry, fields, name }) {
+
+    //1
     const imageFields = this.getImageFields(fields);
     const layoutFields = this.getLayoutFields(fields);
     const otherFields = this.getOtherFields(fields);
+    //2
     const entryImageFields = this.composeEntryImageFields(imageFields, entry);
     const entryLayoutFields = this.composeEntryLayoutFields(
       layoutFields,
@@ -320,9 +400,11 @@ class CreateNodesHelpers {
       entry
     );
 
+    //3
     const node = {
       ...entryWithOtherFields,
       ...entryImageFields,
+      ...entryLayoutFields,
       id: entry._id,
       children: [],
       parent: null,
