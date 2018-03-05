@@ -68,6 +68,7 @@ class AssetMapHelpers {
     this.createNode = createNode;
     this.collectionsItems = collectionsItems;
     this.config = config;
+    this.config.host = config.baseURL + config.folder;
   }
 
   addAllOtherImagesPathsToAssetsArray() {
