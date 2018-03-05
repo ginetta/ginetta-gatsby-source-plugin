@@ -228,7 +228,6 @@ class CreateNodesHelpers {
     };
   }
 
-
   getFileAsset(path) {
     let fileLocation;
 
@@ -241,28 +240,30 @@ class CreateNodesHelpers {
     return fileLocation;
   }
 
-  getSettingFileLocation(setting) {
+  getLayoutSettingFileLocation(setting) {
     let fileLocation;
     let assets = [];
 
     // if setting.path exists it is an images
     if(setting !== null && setting.path !== undefined) {
-      setting.file = this.getFileAsset(setting.path);
-      if(setting.file) {
-        assets.push(setting.file);
+      fileLocation = this.getFileAsset(setting.path);
+      if(fileLocation) {
+        assets.push(fileLocation);
+        setting.file = fileLocation;
       }                
     }
     // if setting[0].path exists it is an array of images
     else if (setting !== null && typeof setting === 'object' && setting[0] != undefined && setting[0].path !== undefined) {
       Object.keys(setting).forEach( imageKey => {
         const image = setting[imageKey];
-
-        image.file = this.getFileAsset(image.path);
-        if(image.file) {
-          assets.push(image.file);
+          
+        fileLocation = this.getFileAsset(image.path);
+        if(fileLocation) {
+          image.file = fileLocation;
+          assets.push(fileLocation);
         }          
+
         setting[imageKey] = image;
-        
       })
     }
 
@@ -275,12 +276,10 @@ class CreateNodesHelpers {
     const nodeAssets = [];
 
     Object.keys(settings).map( (key, index) => {
-      const setting = settings[key];
       
-      const { setting: updatedSetting, assets: newAssets } = this.getSettingFileLocation(setting);
-      settings[key] = updatedSetting;
-      nodeAssets.concat(newAssets);
-      
+      const { setting, assets } = this.getLayoutSettingFileLocation(settings[key]);
+      settings[key] = setting;
+      assets.map(asset => nodeAssets.push(asset));
     })
     node.settings = settings;
 
