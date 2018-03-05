@@ -283,9 +283,17 @@ class CreateNodesHelpers {
     })
     node.settings = settings;
 
+    // filter duplicate assets
+    const seenAssets = {};
+    const distinctAssets = nodeAssets.filter( asset => {
+      const seen = seenAssets[asset] !== undefined;
+      seenAssets[asset] = true;
+      return !seen;
+    })
+
     return {
       node,
-      nodeAssets,
+      nodeAssets: distinctAssets,
     };
   }
 
