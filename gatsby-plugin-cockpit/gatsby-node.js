@@ -7,7 +7,6 @@ exports.sourceNodes = async ({
   store,
   cache,
 }, pluginOptions) => {
-
   const defaultConfig = {
     baseURL: '',
     folder: '',

@@ -90,6 +90,7 @@ module.exports = async (
     );
 
     jsonFields.forEach(fieldname => {
+      console.log(fieldname, fields[fieldname]);
       nodeExtendType[`${fieldname}_parsed`] = {
         type: GraphQLJSON,
         resolve(Item) {
