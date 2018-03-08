@@ -7,8 +7,16 @@ exports.sourceNodes = async ({
   store,
   cache,
 }, pluginOptions) => {
+
+  const defaultConfig = {
+    baseURL: '',
+    folder: '',
+    accessToken: '',
+    sanitizeHtmlConfig: {},    
+    customComponents: [],
+  }
   
-  const config = pluginOptions.cockpitConfig;
+  const config = Object.assign(defaultConfig, pluginOptions.cockpitConfig);
   const host = config.baseURL + config.folder;
 
   const cockpit = new CockpitSDK({
