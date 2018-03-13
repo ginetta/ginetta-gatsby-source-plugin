@@ -60,16 +60,6 @@ exports.sourceNodes = async ({
   });
 
   await createNodesHelpers.createItemsNodes();
-// console.log('ok');
-//   const createRegionsNodesHelpers = new CreateNodesHelpers({
-//     regionsItems,
-//     store,
-//     cache,
-//     createNode,
-//     assetsMap,
-//     config,
-//   });    
-//   console.log(createRegionsNodesHelpers);
 };
 
 exports.setFieldsOnGraphQLNodeType = extendNodeType;
