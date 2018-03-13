@@ -5,6 +5,7 @@ const validUrl = require('valid-url');
 module.exports = class CreateNodesHelpers {
   constructor({
     collectionsItems,
+    regionsItems,
     store,
     cache,
     createNode,
@@ -12,6 +13,7 @@ module.exports = class CreateNodesHelpers {
     config,
   }) {
     this.collectionsItems = collectionsItems;
+    this.regionsItems = regionsItems;
     this.store = store;
     this.cache = cache;
     this.createNode = createNode;
@@ -32,6 +34,15 @@ module.exports = class CreateNodesHelpers {
         );
 
         return { name, nodes, fields };
+      }),
+      this.regionsItems.map( ({ name, data }) => {
+
+        const node = this.createRegionItemNode({
+          data,
+          name,
+        });
+
+        return { name: 'region', node };
       })
     );
   }
@@ -313,4 +324,23 @@ module.exports = class CreateNodesHelpers {
     return node;
   }
 
+  createRegionItemNode({ data, name }) {
+
+    const node = {
+      ...data,
+      name: name,
+      children: [],
+      parent: null,
+      id: `region-${name}`,
+      internal: {
+        type: 'region',
+        contentDigest: crypto
+          .createHash(`md5`)
+          .update(JSON.stringify(data))
+          .digest(`hex`),
+      },
+    };
+    this.createNode(node);
+    return node;
+  }  
 }

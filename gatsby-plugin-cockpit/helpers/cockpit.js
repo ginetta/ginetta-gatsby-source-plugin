@@ -29,4 +29,30 @@ module.exports = class CockpitHelpers {
       : allCollections;
   }
 
+  // get cockpit collection items by collection name
+  async getRegionItems(name) {
+    const data = await this.cockpit.regionData(name);
+    return { data, name };
+  }
+
+  // get all cockpit regions, together with their items
+  async getCockpitRegions() {
+    const regions = await this.getRegionNames();
+    return Promise.all(regions.map(name => {
+      var i = this.getRegionItems(name);
+      return i;
+    }));
+  }  
+
+  async getRegionNames() {
+    
+    const allRegions = eval(await this.cockpit.regionList()); 
+    const explictlyDefinedRegions = this.config.regions;
+
+    return explictlyDefinedRegions instanceof Array
+      ? allRegions.filter(
+        name => explictlyDefinedRegions.indexOf(name) > -1
+      )
+      : allRegions;
+  }
 }

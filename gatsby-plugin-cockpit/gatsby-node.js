@@ -26,14 +26,16 @@ exports.sourceNodes = async ({
   const cockpitHelpers = new CockpitHelpers(cockpit, config);
   const collectionNames = await cockpitHelpers.getCollectionNames();
 
-  const [{ assets }, collectionsItems] = await Promise.all([
+  const [{ assets }, collectionsItems, regionsItems] = await Promise.all([
     cockpit.assets(), 
     cockpitHelpers.getCockpitCollections(),
+    cockpitHelpers.getCockpitRegions(),
   ]);
 
   assets.forEach(asset => asset.path = host + '/storage/uploads' + asset.path);
 
   exports.collectionsItems = collectionsItems;
+  exports.regionsItems = regionsItems;
   exports.collectionsNames = collectionNames;
  
   const assetMapHelpers = new AssetMapHelpers({
@@ -49,6 +51,7 @@ exports.sourceNodes = async ({
 
   const createNodesHelpers = new CreateNodesHelpers({
     collectionsItems,
+    regionsItems,
     store,
     cache,
     createNode,
@@ -56,7 +59,17 @@ exports.sourceNodes = async ({
     config,
   });
 
-  await createNodesHelpers.createCollectionsItemsNodes();
+  await createNodesHelpers.createItemsNodes();
+// console.log('ok');
+//   const createRegionsNodesHelpers = new CreateNodesHelpers({
+//     regionsItems,
+//     store,
+//     cache,
+//     createNode,
+//     assetsMap,
+//     config,
+//   });    
+//   console.log(createRegionsNodesHelpers);
 };
 
 exports.setFieldsOnGraphQLNodeType = extendNodeType;
