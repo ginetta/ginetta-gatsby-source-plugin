@@ -13,7 +13,7 @@ module.exports = {
       },
     },
     {
-      resolve: 'gatsby-source-cockpit-headless-cms',
+      resolve: 'gatsby-plugin-cockpit',
       options: {
         cockpitConfig: {
           baseURL: 'http://localhost:8888',

@@ -16,11 +16,13 @@ You need to add the following to gatsby-config.js
           baseURL: 'http://localhost:8888',
           folder: '/cockpit',
           accessToken: '4d659efb084077fd24aeb4871d4386',
-          collections: ['Post']
+          collections: ['Post'],
+          regions: ['footer'],
+          customComponents: [],
         },
       },
     },
   ],
 ```
 
-note: The collections field is optional, if omitted the plugin will fetch all collections.
+note: The collections and regions field are optional, if omitted the plugin will fetch all collections and all regions.
