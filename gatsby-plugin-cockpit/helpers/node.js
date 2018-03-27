@@ -53,6 +53,12 @@ module.exports = class CreateNodesHelpers {
     );
   }
 
+  getCollectionLinkFields(fields) {
+    return Object.keys(fields).filter(
+      fieldname => fields[fieldname].type === 'collectionlink'
+    );
+  }  
+
   getLayoutFields(fields) {
     return Object.keys(fields).filter(
       fieldname => fields[fieldname].type === 'layout'
@@ -61,7 +67,7 @@ module.exports = class CreateNodesHelpers {
 
   getOtherFields(fields) {
     return Object.keys(fields).filter(
-      fieldname => fields[fieldname].type !== 'image'
+      fieldname => fields[fieldname].type !== 'image' && fields[fieldname].type !== 'collectionlink'
     );
   }
 
@@ -83,6 +89,20 @@ module.exports = class CreateNodesHelpers {
       return newAcc;
     }, {});
   }
+
+  // map the entry CollectionLink fields to link to the asset node
+  // the important part is the `___NODE`.
+  composeEntryCollectionLinkFields(collectionLinkFields, entry) {
+    return collectionLinkFields.reduce((acc, fieldname) => {
+
+      const key = fieldname + '___NODE';
+      const newAcc = {
+        ...acc,
+        [key]: entry[fieldname]._id,
+      };
+      return newAcc;
+    }, {});
+  }  
 
   async parseWysiwygField(field) {
     const srcRegex = /src\s*=\s*"(.+?)"/gi;
@@ -292,9 +312,11 @@ module.exports = class CreateNodesHelpers {
     //1
     const imageFields = this.getImageFields(fields);
     const layoutFields = this.getLayoutFields(fields);
+    const collectionLinkFields = this.getCollectionLinkFields(fields);
     const otherFields = this.getOtherFields(fields);
     //2
     const entryImageFields = this.composeEntryImageFields(imageFields, entry);
+    const entryCollectionLinkFields = this.composeEntryCollectionLinkFields(collectionLinkFields, entry);
     const entryLayoutFields = this.composeEntryLayoutFields(
       layoutFields,
       entry
@@ -308,6 +330,7 @@ module.exports = class CreateNodesHelpers {
     const node = {
       ...entryWithOtherFields,
       ...entryImageFields,
+      ...entryCollectionLinkFields,
       ...entryLayoutFields,
       id: entry._id,
       children: [],
