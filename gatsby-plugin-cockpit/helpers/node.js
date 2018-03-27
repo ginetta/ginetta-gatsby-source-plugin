@@ -53,6 +53,12 @@ module.exports = class CreateNodesHelpers {
     );
   }
 
+  getAssetFields(fields) {
+    return Object.keys(fields).filter(
+      fieldname => fields[fieldname].type === 'asset'
+    );
+  }  
+
   getCollectionLinkFields(fields) {
     return Object.keys(fields).filter(
       fieldname => fields[fieldname].type === 'collectionlink'
@@ -67,14 +73,14 @@ module.exports = class CreateNodesHelpers {
 
   getOtherFields(fields) {
     return Object.keys(fields).filter(
-      fieldname => fields[fieldname].type !== 'image' && fields[fieldname].type !== 'collectionlink'
+      fieldname => !['image', 'asset', 'collectionlink'].includes(fields[fieldname].type)
     );
   }
 
   // map the entry image fields to link to the asset node
   // the important part is the `___NODE`.
-  composeEntryImageFields(imageFields, entry) {
-    return imageFields.reduce((acc, fieldname) => {
+  composeEntryAssetFields(assetFields, entry) {
+    return assetFields.reduce((acc, fieldname) => {
       if (entry[fieldname].path == null) {
         return acc;
       }
@@ -311,11 +317,13 @@ module.exports = class CreateNodesHelpers {
 
     //1
     const imageFields = this.getImageFields(fields);
+    const assetFields = this.getAssetFields(fields);
     const layoutFields = this.getLayoutFields(fields);
     const collectionLinkFields = this.getCollectionLinkFields(fields);
     const otherFields = this.getOtherFields(fields);
     //2
-    const entryImageFields = this.composeEntryImageFields(imageFields, entry);
+    const entryImageFields = this.composeEntryAssetFields(imageFields, entry);
+    const entryAssetFields = this.composeEntryAssetFields(assetFields, entry);
     const entryCollectionLinkFields = this.composeEntryCollectionLinkFields(collectionLinkFields, entry);
     const entryLayoutFields = this.composeEntryLayoutFields(
       layoutFields,
@@ -330,6 +338,7 @@ module.exports = class CreateNodesHelpers {
     const node = {
       ...entryWithOtherFields,
       ...entryImageFields,
+      ...entryAssetFields,
       ...entryCollectionLinkFields,
       ...entryLayoutFields,
       id: entry._id,
