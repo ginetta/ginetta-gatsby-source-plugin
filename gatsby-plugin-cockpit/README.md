@@ -120,7 +120,9 @@ allPlayer {
 
 ###Asset
 
-For example, if you have a `candidates` collection with a name and a pdf as an asset field. You can get the PDF URL with following GraphQL query:
+The asset field gets extended with a `localFile` attribute linking to the corresponding file node. 
+
+For example, if you have a `candidates` collection with a name and a pdf as an asset field. So You can get the PDF URL with following GraphQL query:
 
 ```
 allCandidate {
@@ -128,7 +130,9 @@ allCandidate {
         nodes {
             name
             pdf {
-                publicURL
+            	localFile {
+	                publicURL                    
+            	}
             }            
         }
 	}
@@ -137,7 +141,9 @@ allCandidate {
 
 ### Image
 
-Or given a `post` collection with title, content and preview. You can use [`gatsby-image` plugin](https://www.gatsbyjs.org/packages/gatsby-image/) in your GraphQL query and take advantage of Gatsby's image processing features.
+Like the asset field, the image field gets extended with a `localFile` attribute linking to the corresponding file node. 
+
+Given a `post` collection with title, content and preview. You can use [`gatsby-image` plugin](https://www.gatsbyjs.org/packages/gatsby-image/) in your GraphQL query and take advantage of Gatsby's image processing features.
 
 ```
 allPost {
@@ -146,15 +152,15 @@ allPost {
             title
             content
             preview {
-                childImageSharp {
-                    sizes(maxWidth: 2000, quality: 90) {
-                        ...GatsbyImageSharpSizes_withWebp
-                    }
-                }
+            	localFile {
+                    childImageSharp {
+                        sizes(maxWidth: 2000, quality: 90) {
+                            ...GatsbyImageSharpSizes_withWebp
+                        }
+                    }                    
+            	}
             }            
         }
 	}
 }
 ```
-
-
