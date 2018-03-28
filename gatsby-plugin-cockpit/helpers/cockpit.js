@@ -47,7 +47,7 @@ module.exports = class CockpitHelpers {
 
   async getRegionNames() {
     
-    const allRegions = eval(await this.cockpit.regionList()); 
+    const allRegions = await this.cockpit.regionList(); 
     const explictlyDefinedRegions = this.config.regions;
 
     return explictlyDefinedRegions instanceof Array
