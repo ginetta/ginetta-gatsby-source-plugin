@@ -14,7 +14,7 @@ export default ({ data }) => {
       <h1>{post.title}</h1>
       {
         post.image 
-          ? <img src={post.image.publicURL} /> 
+          ? <img src={post.image.localFile.publicURL} /> 
           : null
       }
       {
@@ -34,7 +34,9 @@ export const query = graphql`
           title
           layoutGrid
           image {
-            publicURL
+            localFile {
+              publicURL
+            }
           }
           layout {
             component

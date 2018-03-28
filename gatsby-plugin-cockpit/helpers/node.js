@@ -86,11 +86,11 @@ module.exports = class CreateNodesHelpers {
       }
 
       let fileLocation = this.getFileAsset(entry[fieldname].path);
-
-      const key = fieldname + '___NODE';
+      
+      entry[fieldname].localFile___NODE = fileLocation;
       const newAcc = {
         ...acc,
-        [key]: fileLocation,
+        [fieldname]: entry[fieldname],
       };
       return newAcc;
     }, {});
@@ -171,7 +171,7 @@ module.exports = class CreateNodesHelpers {
       fileLocation = this.getFileAsset(setting.path);
       if(fileLocation) {
         assets.push(fileLocation);
-        setting.file = fileLocation;
+        setting.localFileId = fileLocation;
       }                
     }
     // if setting[0].path exists it is an array of images
@@ -181,7 +181,7 @@ module.exports = class CreateNodesHelpers {
           
         fileLocation = this.getFileAsset(image.path);
         if(fileLocation) {
-          image.file = fileLocation;
+          image.localFileId = fileLocation;
           assets.push(fileLocation);
         }          
 
