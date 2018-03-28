@@ -1,8 +1,6 @@
 # gatsby-plugin-cockpit
 
-*This plugin has a beta status and has been developed with a specific project in mind. It should also apply to your project though it does not cover every Cockpit use case.*
-
-This source plugin pulls Cockpit data to Gatsby.
+This source plugin pulls [Cockpit Headless CMS](https://getcockpit.com) data to [GatsbyJS](https://www.gatsbyjs.org), a static site generator for React.
 
 ### Resources
 
