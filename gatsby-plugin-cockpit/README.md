@@ -4,6 +4,11 @@
 
 This source plugin pulls Cockpit data to Gatsby.
 
+### Resources
+
++ **[Example project](https://github.com/pierreberchtold/gatsby-cockpit-portfolio)**: a simple portfolio with pages and projects
++ **Getting started article** (coming soon): an introduction based on the example project.
+
 ## Install
 
 `npm install --save gatsby-plugin-cockpit`
@@ -13,7 +18,7 @@ This source plugin pulls Cockpit data to Gatsby.
 Add the following to `gatsby-config.js`
 
 ```
-  plugins: [			    
+  plugins: [
     {
       resolve: `gatsby-source-filesystem`,
       options: {
@@ -75,7 +80,7 @@ Assets are converted into Gatsby filesystem files and can be fetched with `allFi
 allFile {
     edges {
         nodes {
-        	id
+            id
             publicURL
             ...
         }
