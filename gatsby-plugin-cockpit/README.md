@@ -103,7 +103,7 @@ footer: region(name: { eq: "footer" }) {
 
 The Gatsby **CollectionLink,**  **Asset** and **Image** fields will be parsed and transform into corresponding GraphQL nodes.
 
-### CollectionLink
+### CollectionLink Field
 
 The CollectionLink field links a collection to another collection. Here an example with `players` and `teams` collections.
 
@@ -121,7 +121,7 @@ allPlayer {
 }
 ```
 
-###Asset
+###Asset Field
 
 The asset field gets extended with a `localFile` attribute linking to the corresponding file node. 
 
@@ -142,7 +142,7 @@ allCandidate {
 }
 ```
 
-### Image
+### Image Field
 
 Like the asset field, the image field gets extended with a `localFile` attribute linking to the corresponding file node. 
 
@@ -167,3 +167,35 @@ allPost {
 	}
 }
 ```
+### Layout Field
+
+The layout field enables us to visually arrange components. It is even possible to define custom components corresponding to React Components we will us in Gatsby. This may be done with the [LayoutComponents addon](https://github.com/agentejo/LayoutComponents).
+
+Given a `page` collection with title and content. You can do the following query:
+
+```
+allPage {
+	edges {
+        nodes {
+            title
+            content {
+            	component
+		        settings {
+                    # component fields
+                    ...
+		        }
+            }    
+            content_parsed
+            content_files {
+                id
+                publicURL
+                # normal file node
+            }
+        }
+	}
+}
+```
+
+- ***fieldname*** gives you the components with their settings
+- ***fieldname*_parsed** gives you the the same than field name but in an object. It enables you to ignore the type of components in the query and just getting all the component settings.
+- ***fieldname*_files** gives you all the file nodes present in the layout.
