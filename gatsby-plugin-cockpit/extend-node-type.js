@@ -41,16 +41,15 @@ module.exports = async (
   const parseHtml = (type, node) => {
     const { settings } = node;
     if (settings[type] === '') {
-      node.html = null;
+      node.settings.html = null;
     } else if (settings[type] && settings[type].length > 0) {
-      node.html = settings[type];
-      node.html_sanitize = sanitizeHtml(
+      node.settings.html = settings[type];
+      node.settings.html_sanitize = sanitizeHtml(
         settings[type],
         cockpitConfig.sanitizeHtmlConfig
       );
-      node.html_react = htmlToReactParser.parse(settings[type]);
+      node.settings.html_react = htmlToReactParser.parse(settings[type]);
     }
-    delete settings[type];
     return node;
   };
 

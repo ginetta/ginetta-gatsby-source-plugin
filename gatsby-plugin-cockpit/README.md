@@ -1,8 +1,8 @@
 # gatsby-plugin-cockpit
 
-This source plugin pulls [Cockpit Headless CMS](https://getcockpit.com) data to [GatsbyJS](https://www.gatsbyjs.org), a static site generator for React.
+This source plugin pulls [Cockpit Headless CMS](https://getcockpit.com) data to a[GatsbyJS](https://www.gatsbyjs.org), a static site generator for React.
 
-### Resources
+## Resources
 
 + **[Example project](https://github.com/pierreberchtold/gatsby-cockpit-portfolio)**: a simple portfolio with pages and projects
 + **Getting started article** (coming soon): an introduction based on the example project.
