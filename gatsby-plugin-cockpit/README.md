@@ -5,7 +5,7 @@ This source plugin pulls [Cockpit Headless CMS](https://getcockpit.com) data to 
 ## Resources
 
 + **[Example project](https://github.com/pierreberchtold/gatsby-cockpit-portfolio)**: a simple portfolio with pages and projects
-+ **Getting started article** (coming soon): an introduction based on the example project.
++ **[Getting started article](https://blog.ginetta.net/getting-started-with-gatsby-and-cockpit-part-1-of-2-d86871932d44)**: an introduction based on the example project.
 
 ## Install
 
