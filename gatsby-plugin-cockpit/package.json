@@ -5,6 +5,7 @@
   "version": "1.0.39",
   "keywords": ["gatsby", "gatsby-plugin", "gatsby-source-plugin", "cockpit"],
   "license": "MIT",
+  "repository": "github:ginetta/ginetta-gatsby-source-plugin",
   "dependencies": {
     "cockpit-sdk": "^0.9.4",
     "gatsby-source-filesystem": "^1.5.15",
