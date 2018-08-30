@@ -36,7 +36,7 @@ class AssetMapHelpers {
     this.createNode = createNode;
     this.collectionsItems = collectionsItems;
     this.config = config;
-    this.config.host = config.baseURL + config.folder;
+    this.config.host = config.baseURL;
   }
 
   addAllOtherImagesPathsToAssetsArray() {
@@ -49,7 +49,7 @@ class AssetMapHelpers {
           if (entry[fieldname].path) {
             let path = entry[fieldname].path;
             if (!validUrl.isUri(path)) {
-              path = this.config.host + '/' + path;
+              path = this.config.host + path;
             }
             if (validUrl.isUri(path)) {
               this.assets.push({
