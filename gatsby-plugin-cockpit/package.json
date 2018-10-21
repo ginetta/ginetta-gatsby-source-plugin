@@ -1,18 +1,23 @@
 {
-  "name": "gatsby-plugin-cockpit",
+  "name": "steven-harris-gatsby-plugin-cockpit",
   "description": "Gatsby source plugin for Cockpit headless CMS API.",
   "author": "Paul Hayes <paul@ginetta.net>",
-  "version": "1.0.39",
-  "keywords": ["gatsby", "gatsby-plugin", "gatsby-source-plugin", "cockpit"],
+  "version": "1.0.41",
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "gatsby-source-plugin",
+    "cockpit"
+  ],
   "license": "MIT",
   "dependencies": {
-    "cockpit-sdk": "^0.9.4",
     "gatsby-source-filesystem": "^1.5.15",
     "graphql-type-json": "^0.1.4",
     "html-to-react": "^1.3.3",
     "pluralize": "^7.0.0",
     "react-styling": "^1.6.4",
     "sanitize-html": "^1.17.0",
+    "steven-harris-cockpit-sdk": "^0.9.3",
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
