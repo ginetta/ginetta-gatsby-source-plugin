@@ -11,10 +11,10 @@ exports.sourceNodes = async ({
     baseURL: '',
     folder: '',
     accessToken: '',
-    sanitizeHtmlConfig: {},    
+    sanitizeHtmlConfig: {},
     customComponents: [],
   }
-  
+
   const config = Object.assign(defaultConfig, pluginOptions.cockpitConfig);
   const host = config.baseURL + config.folder;
 
@@ -26,18 +26,18 @@ exports.sourceNodes = async ({
   const cockpitHelpers = new CockpitHelpers(cockpit, config);
   const collectionNames = await cockpitHelpers.getCollectionNames();
 
-  const [{ assets }, collectionsItems, regionsItems] = await Promise.all([
-    cockpit.assets(), 
+  const [{ assets }, collectionsItems, singletonsItems] = await Promise.all([
+    cockpit.assets(),
     cockpitHelpers.getCockpitCollections(),
-    cockpitHelpers.getCockpitRegions(),
+    cockpitHelpers.getCockpitSingletons(),
   ]);
 
   assets.forEach(asset => asset.path = host + '/storage/uploads' + asset.path);
 
   exports.collectionsItems = collectionsItems;
-  exports.regionsItems = regionsItems;
+  exports.singletonsItems = singletonsItems;
   exports.collectionsNames = collectionNames;
- 
+
   const assetMapHelpers = new AssetMapHelpers({
     assets,
     store,
@@ -51,7 +51,7 @@ exports.sourceNodes = async ({
 
   const createNodesHelpers = new CreateNodesHelpers({
     collectionsItems,
-    regionsItems,
+    singletonsItems,
     store,
     cache,
     createNode,

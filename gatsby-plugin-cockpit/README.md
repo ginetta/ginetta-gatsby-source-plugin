@@ -32,7 +32,7 @@ Add the following to `gatsby-config.js`
           folder: '/cockpit',
           accessToken: '4d659efb084077fd24aeb4871d4386',
           collections: ['posts'],
-          regions: ['footer'],
+          singletons: ['footer'],
           customComponents: [],
         },
       },
@@ -48,12 +48,12 @@ Add the following to `gatsby-config.js`
 | **folder**           | *optional* | *''*    | The folder of your Cockpit installation                      |
 | **accessToken**      | *required* | *none*  | A valid API access token to you cockpit installation. See the [Cockpit Documentation](https://getcockpit.com/documentation/api/token) |
 | **collections**      | *optional* | *[]*    | The specific Cockpit collections you want to fetch. If empty all collections will be fetched. |
-| **regions**          | *optional* | *[]*    | The specific Cockpit regions you want to fetch. If empty all regions will be fetched. |
+| **singletons**          | *optional* | *[]*    | The specific Cockpit singletons you want to fetch. If empty all singletons will be fetched. |
 | **customComponents** | *optional* | *[]*    | If you have defined some custom components for you cockpit layout fields and want them to be parsed for image fields. |
 
 ## How to Query
 
-You can query *collections*, *regions* and *assets*.
+You can query *collections*, *singletons* and *assets*.
 
 ### Query Collections
 
@@ -86,12 +86,12 @@ allFile {
 }
 ```
 
-### Query Regions
+### Query Singletons
 
-Regions are available in GraphQL as region nodes. So if you have a `footer` region in Cockpit with a *col1* and a *col2* field you can use following GraphQL query:
+Singletons are available in GraphQL as singleton nodes. So if you have a `footer` singleton in Cockpit with a *col1* and a *col2* field you can use following GraphQL query:
 
 ```
-footer: region(name: { eq: "footer" }) {
+footer: singleton(name: { eq: "footer" }) {
 	values {
 		col1
 		col2
