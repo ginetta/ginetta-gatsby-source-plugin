@@ -5,7 +5,7 @@ const validUrl = require('valid-url');
 module.exports = class CreateNodesHelpers {
   constructor({
     collectionsItems,
-    regionsItems,
+    singletonsItems,
     store,
     cache,
     createNode,
@@ -13,7 +13,7 @@ module.exports = class CreateNodesHelpers {
     config,
   }) {
     this.collectionsItems = collectionsItems;
-    this.regionsItems = regionsItems;
+    this.singletonsItems = singletonsItems;
     this.store = store;
     this.cache = cache;
     this.createNode = createNode;
@@ -22,9 +22,9 @@ module.exports = class CreateNodesHelpers {
   }
 
   async createItemsNodes() {
-    Promise.all(      
+    Promise.all(
       this.collectionsItems.map(({ fields, entries, name }) => {
-        
+
         const nodes = entries.map(entry =>
           this.createCollectionItemNode({
             entry,
@@ -35,14 +35,14 @@ module.exports = class CreateNodesHelpers {
 
         return { name, nodes, fields };
       }),
-      this.regionsItems.map( ({ name, data }) => {
+      this.singletonsItems.map(({ name, data }) => {
 
-        const node = this.createRegionItemNode({
+        const node = this.createSingletonItemNode({
           data,
           name,
         });
 
-        return { name: 'region', node };
+        return { name: 'singleton', node };
       })
     );
   }
@@ -57,13 +57,13 @@ module.exports = class CreateNodesHelpers {
     return Object.keys(fields).filter(
       fieldname => fields[fieldname].type === 'asset'
     );
-  }  
+  }
 
   getCollectionLinkFields(fields) {
     return Object.keys(fields).filter(
       fieldname => fields[fieldname].type === 'collectionlink'
     );
-  }  
+  }
 
   getLayoutFields(fields) {
     return Object.keys(fields).filter(
@@ -86,7 +86,7 @@ module.exports = class CreateNodesHelpers {
       }
 
       let fileLocation = this.getFileAsset(entry[fieldname].path);
-      
+
       entry[fieldname].localFile___NODE = fileLocation;
       const newAcc = {
         ...acc,
@@ -108,7 +108,7 @@ module.exports = class CreateNodesHelpers {
       };
       return newAcc;
     }, {});
-  }  
+  }
 
   async parseWysiwygField(field) {
     const srcRegex = /src\s*=\s*"(.+?)"/gi;
@@ -167,23 +167,23 @@ module.exports = class CreateNodesHelpers {
     let assets = [];
 
     // if setting.path exists it is an images
-    if(setting !== null && setting.path !== undefined) {
+    if (setting !== null && setting.path !== undefined) {
       fileLocation = this.getFileAsset(setting.path);
-      if(fileLocation) {
+      if (fileLocation) {
         assets.push(fileLocation);
         setting.localFileId = fileLocation;
-      }                
+      }
     }
     // if setting[0].path exists it is an array of images
     else if (setting !== null && typeof setting === 'object' && setting[0] != undefined && setting[0].path !== undefined) {
-      Object.keys(setting).forEach( imageKey => {
+      Object.keys(setting).forEach(imageKey => {
         const image = setting[imageKey];
-          
+
         fileLocation = this.getFileAsset(image.path);
-        if(fileLocation) {
+        if (fileLocation) {
           image.localFileId = fileLocation;
           assets.push(fileLocation);
-        }          
+        }
 
         setting[imageKey] = image;
       })
@@ -193,12 +193,12 @@ module.exports = class CreateNodesHelpers {
   }
 
   // look into Cockpit CP_LAYOUT_COMPONENTS for image and images.
-  parseCustomComponent( node, fieldname ) {
+  parseCustomComponent(node, fieldname) {
     const { settings } = node;
     const nodeAssets = [];
 
-    Object.keys(settings).map( (key, index) => {
-      
+    Object.keys(settings).map((key, index) => {
+
       const { setting, assets } = this.getLayoutSettingFileLocation(settings[key]);
       settings[key] = setting;
       assets.map(asset => nodeAssets.push(asset));
@@ -207,7 +207,7 @@ module.exports = class CreateNodesHelpers {
 
     // filter duplicate assets
     const seenAssets = {};
-    const distinctAssets = nodeAssets.filter( asset => {
+    const distinctAssets = nodeAssets.filter(asset => {
       const seen = seenAssets[asset] !== undefined;
       seenAssets[asset] = true;
       return !seen;
@@ -247,11 +247,11 @@ module.exports = class CreateNodesHelpers {
       }
 
       // parse Cockpit Custom Components (defined in plugin config in /gatsby-config.js)
-      if(this.config.customComponents.includes(node.component)) {
-        const {node: customNode, nodeAssets: customComponentAssets } = this.parseCustomComponent(node, fieldname);
-        
+      if (this.config.customComponents.includes(node.component)) {
+        const { node: customNode, nodeAssets: customComponentAssets } = this.parseCustomComponent(node, fieldname);
+
         node = customNode;
-        layoutAssets = layoutAssets.concat(customComponentAssets);  
+        layoutAssets = layoutAssets.concat(customComponentAssets);
       }
 
       if (node.children) {
@@ -260,21 +260,21 @@ module.exports = class CreateNodesHelpers {
         } else {
           console.log('column');
         }
-        
-        const {parsedLayout: childrenLayout, layoutAssets: childrenAssets } = this.parseLayout(node.children, fieldname);
+
+        const { parsedLayout: childrenLayout, layoutAssets: childrenAssets } = this.parseLayout(node.children, fieldname);
         node.children = childrenLayout;
         layoutAssets = layoutAssets.concat(childrenAssets);
       }
       if (node.columns) {
-        const {parsedLayout: columnsLayout, layoutAssets: columnsAssets } = this.parseLayout(node.columns, fieldname, true);
+        const { parsedLayout: columnsLayout, layoutAssets: columnsAssets } = this.parseLayout(node.columns, fieldname, true);
         node.columns = childrenLayout;
-        layoutAssets = layoutAssets.concat(columnsAssets);        
+        layoutAssets = layoutAssets.concat(columnsAssets);
       }
 
       return node;
     });
 
-    
+
     return {
       parsedLayout,
       layoutAssets,
@@ -284,17 +284,17 @@ module.exports = class CreateNodesHelpers {
   composeEntryLayoutFields(layoutFields, entry) {
 
     return layoutFields.reduce((acc, fieldname) => {
-      if( entry[fieldname] == null) return;
-      if(typeof entry[fieldname] === 'string')entry[fieldname] = eval('(' + entry[fieldname] + ')');
-      
+      if (entry[fieldname] == null) return;
+      if (typeof entry[fieldname] === 'string') entry[fieldname] = eval('(' + entry[fieldname] + ')');
+
       if (entry[fieldname].length === 0) {
         return acc;
       }
-      const {parsedLayout, layoutAssets} = this.parseLayout(entry[fieldname], fieldname);      
-      
-      if(layoutAssets.length > 0) {
+      const { parsedLayout, layoutAssets } = this.parseLayout(entry[fieldname], fieldname);
+
+      if (layoutAssets.length > 0) {
         const key = fieldname + '_files___NODE';
-        if(acc[key] !== undefined)acc[key] = acc[key].concat(layoutAssets);
+        if (acc[key] !== undefined) acc[key] = acc[key].concat(layoutAssets);
         else acc[key] = layoutAssets;
       }
 
@@ -356,16 +356,16 @@ module.exports = class CreateNodesHelpers {
     return node;
   }
 
-  createRegionItemNode({ data, name }) {
+  createSingletonItemNode({ data, name }) {
 
     const node = {
       ...data,
       name: name,
       children: [],
       parent: null,
-      id: `region-${name}`,
+      id: `singleton-${name}`,
       internal: {
-        type: 'region',
+        type: 'singleton',
         contentDigest: crypto
           .createHash(`md5`)
           .update(JSON.stringify(data))
@@ -374,5 +374,5 @@ module.exports = class CreateNodesHelpers {
     };
     this.createNode(node);
     return node;
-  }  
+  }
 }
